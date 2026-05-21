@@ -6,7 +6,7 @@ A SQL query engine built from scratch in C++. No libraries. No shortcuts. Raw sy
 
 I'm documenting everything as I build — code, bugs, decisions, and breakdowns.
 
-- 🎥 YouTube — [Stage 1: Lexer / Tokenizer]([https://youtu.be/hpChXe3dRUw](https://youtu.be/hpChXe3dRUw?si=cEWNURj-0tVlM-Y2))
+- 🎥 YouTube — [Stage 1: Lexer / Tokenizer](https://youtu.be/hpChXe3dRUw?si=cEWNURj-0tVlM-Y2)
 - 📝 Medium — [Building a SQL Engine From Scratch](https://medium.com/@zoolpher)
 - 🐦 X — [@aryanmh0](https://x.com/aryanmh0)
 
