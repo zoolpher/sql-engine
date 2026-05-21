@@ -1,6 +1,7 @@
 #include "../../include/token.h"
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 class Lexer {
 private:
@@ -77,33 +78,37 @@ public:
                 i++;
             }
 
-             else if (input[i] == ',') {
-                tokens.push_back({TokenType::COMMA, ","});
+            else if (input[i] == ',') {
+               tokens.push_back({TokenType::COMMA, ","});
             }
 
-             else if (input[i] == ';') {
+            else if (input[i] == ';') {
                 tokens.push_back({TokenType::SEMICOLON, ";"});
             }
 
-             else if (input[i] == '(') {
+            else if (input[i] == '(') {
                 tokens.push_back({TokenType::LPAREN, "("});
             }
 
-             else if (input[i] == ')') {
+            else if (input[i] == ')') {
                 tokens.push_back({TokenType::RPAREN, ")"});
             }
 
-             else if (input[i] == '\'') {
+            else if (input[i] == '\'') {
                 std::string str;
                 i++; // skip opening quote
                 while (i < input.length() && input[i] != '\'') {
                     str.push_back(input[i]);
                     i++;
                 }
-                tokens.push_back({TokenType::STRING, str});
+                // FIX BUG: detect unterminated string
+                // if (i >= input.length()) {
+                //     throw std::runtime_error("Lexer error: unterminated string literal");
+                // }
+                // tokens.push_back({TokenType::STRING, str});
             }
 
-             else {
+            else {
                 // Handle unrecognized characters or throw an error
             }
         }
