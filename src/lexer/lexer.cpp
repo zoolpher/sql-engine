@@ -1,4 +1,4 @@
-#include "token.h"
+#include "../../include/token.h"
 #include <vector>
 #include <string>
 
