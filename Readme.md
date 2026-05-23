@@ -110,6 +110,16 @@ make
 
 ## Stage Progress
 
+- [x] Stage 1 — Lexer / Tokenizer
+- [x] Stage 2 — Parser (AST Builder)
+- [ ] Stage 3 — Semantic Analyzer
+- [ ] Stage 4 — Query Planner
+- [ ] Stage 5 — Optimizer
+- [ ] Stage 6 — Execution Engine
+- [ ] Stage 7 — Storage Layer
+- [ ] Stage 8 — REPL Interface
+
+
 ### Stage 1 — Lexer / Tokenizer ✅
 
 Implemented in `include/token.h` and `src/lexer/lexer.cpp`.
@@ -165,14 +175,35 @@ else if (input[i] == '\'') {
 
 This is demonstrated live in `tests/test_lexer.cpp`.
 
-- [x] Stage 1 — Lexer / Tokenizer
-- [ ] Stage 2 — Parser (AST Builder)
-- [ ] Stage 3 — Semantic Analyzer
-- [ ] Stage 4 — Query Planner
-- [ ] Stage 5 — Optimizer
-- [ ] Stage 6 — Execution Engine
-- [ ] Stage 7 — Storage Layer
-- [ ] Stage 8 — REPL Interface
+---
+
+### Stage 2 — Parser / AST Builder ✅
+ 
+Implemented in `include/ast.h` and `src/parser/parser.cpp`.
+ 
+- Defined a base `ASTNode` struct with a `child` pointer (initialized to `nullptr`) and a virtual destructor to enable safe `dynamic_cast` across the tree
+- Defined node types via inheritance from `ASTNode`: `SelectNode` (stores list of column names), `FromNode` (stores table name), `WhereNode` (stores a `ConditionNode`), `OrderByNode`, and `GroupByNode`
+- `ConditionNode` is a separate struct holding `left`, `op`, and `right` as strings — represents expressions like `age > 20`
+- Parser walks the token stream using `peek()` (look at current token) and `consume()` (read and advance) — same maximal munch principle as the lexer but at the token level
+- Builds the AST by connecting nodes via `child` pointers: `SelectNode → WhereNode → FromNode → OrderByNode/GroupByNode`
+- Handles optional clauses gracefully — queries without `WHERE` or `FROM` don't crash; missing nodes are detected and tree is connected accordingly
+- Guards all inner loops with `END_OF_FILE` checks to prevent out-of-bounds crashes on malformed queries
+## Bug Found in Stage 2 — Uninitialized Child Pointer
+ 
+`ASTNode::child` was declared without initialization, leaving it as a garbage pointer. Any traversal of the tree (in the executor or debug printer) could crash or read invalid memory.
+ 
+**The fix:** Initialize at declaration:
+ 
+```cpp
+struct ASTNode {
+    ASTNode* child = nullptr;
+    virtual ~ASTNode() = default;
+};
+```
+ 
+**The principle:**
+ 
+> Always initialize pointers. An uninitialized pointer is a ticking time bomb — it won't crash immediately, it'll crash three stages later in the hardest place to debug.
 
 ---
 
