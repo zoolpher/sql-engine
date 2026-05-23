@@ -102,10 +102,10 @@ public:
                     i++;
                 }
                 // FIX BUG: detect unterminated string
-                // if (i >= input.length()) {
-                //     throw std::runtime_error("Lexer error: unterminated string literal");
-                // }
-                // tokens.push_back({TokenType::STRING, str});
+                if (i >= input.length()) {
+                    throw std::runtime_error("Lexer error: unterminated string literal");
+                }
+                tokens.push_back({TokenType::STRING, str});
             }
 
             else {
