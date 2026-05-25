@@ -7,6 +7,7 @@ A SQL query engine built from scratch in C++. No libraries. No shortcuts. Raw sy
 I'm documenting everything as I build — code, bugs, decisions, and breakdowns.
 
 - 🎥 YouTube — [Stage 1: Lexer / Tokenizer](https://youtu.be/A9iKONyU0yU?si=O592VJJSCR695r2a)
+- 🎥 YouTube — [Stage 2: Parser](https://youtu.be/8oS6S5Kggxc)
 - 📝 Medium — [Building a SQL Engine From Scratch](https://medium.com/@zoolpher)
 - 🐦 X — [@aryanmh0](https://x.com/aryanmh0)
 
@@ -204,6 +205,42 @@ struct ASTNode {
 **The principle:**
  
 > Always initialize pointers. An uninitialized pointer is a ticking time bomb — it won't crash immediately, it'll crash three stages later in the hardest place to debug.
+
+---
+
+### Stage 3 — Semantic Analyzer ✅
+
+Implemented in `include/catalog.h` and `src/semantic/semantic_analyzer.cpp`.
+
+- Defined `ColumnSchema` struct holding `col_name` and `col_type`, and `TableSchema` struct holding `table_name` and a vector of `ColumnSchema`
+- Defined `Catalog` struct as the in-memory schema registry — stores all tables and exposes `getTable()` for lookup by name
+- Semantic analyzer walks the AST in three passes: (1) find and validate the table in `FromNode`, (2) validate all columns in `SelectNode` against the table schema, (3) validate the `WHERE` condition column in `WhereNode`
+- Each pass traverses the full AST via `child` pointer chain using `dynamic_cast` to identify node types
+- Throws `std::runtime_error` immediately on first violation — unknown table, unknown column in SELECT, or unknown column in WHERE condition
+
+## Bug Found in Stage 3 — Empty WhereNode Always Validated
+
+The parser always attaches a `WhereNode` to the AST, even for queries with no `WHERE` clause. This means `condition.left` is an empty string `""` for queries like `SELECT name FROM users`.
+
+Pass 3 of the semantic analyzer then tries to validate `""` as a column name — and throws an error on a perfectly valid query.
+
+**The fix:** Skip WHERE validation if the condition is empty:
+
+```cpp
+if (WhereNode* w = dynamic_cast<WhereNode*>(ast_node)) {
+    if (w->condition.left.empty()) {
+        ast_node = ast_node->child;
+        continue;
+    }
+    // proceed with validation
+}
+```
+
+**The principle:**
+
+> Don't validate what isn't there. An empty node is not an error — treating it as one is.
+
+This is demonstrated live in `tests/test_semantic.cpp`.
 
 ---
 
