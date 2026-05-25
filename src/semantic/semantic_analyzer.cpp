@@ -52,6 +52,14 @@ public:
         ast_node = root;
         while (ast_node != nullptr) {
             if (WhereNode* w = dynamic_cast<WhereNode*>(ast_node)) {
+                
+                // BUG: if no WHERE clause, condition.left will be empty string
+                // we should skip validation in that case
+                if (w->condition.left.empty()) {
+                    ast_node = ast_node->child;
+                    continue;
+                }
+
                 const std::string& col = w->condition.left;
                 bool found = false;
                 for (const ColumnSchema& c : table->columns) {
