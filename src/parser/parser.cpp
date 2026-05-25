@@ -33,7 +33,7 @@ public:
             if (peek().type == TokenType::SELECT) {
                 consume();
                 while (peek().type != TokenType::FROM &&
-                       peek().type != TokenType::END_OF_FILE) {
+                        peek().type != TokenType::END_OF_FILE) {
                     Token t = consume();
                     if (t.type == TokenType::IDENTIFIER) {
                         selectNode->columns.push_back(t.value);
@@ -94,7 +94,6 @@ public:
         } else {
             selectNode->child = nullptr;
         }
-
         return selectNode;
     }
 };
