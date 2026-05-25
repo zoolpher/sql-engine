@@ -3,6 +3,8 @@
 #include "../../include/ast.h"
 #include "../../include/catalog.h"
 
+#include <stdexcept>
+
 class SemanticAnalyzer {
 private:
     ASTNode* root;
