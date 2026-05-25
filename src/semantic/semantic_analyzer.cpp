@@ -34,7 +34,7 @@ public:
             if (SelectNode* s = dynamic_cast<SelectNode*>(ast_node)) {
                 for (const std::string& col : s->columns) {
                     bool found = false;
-                    for (const ColumnSchema& c : table->columns) {
+                    for (const ColumnSchema& c : table->columns) {   
                         if (c.col_name == col) {
                             found = true;
                             break;
@@ -57,7 +57,7 @@ public:
                 // we should skip validation in that case
                 if (w->condition.left.empty()) {
                     ast_node = ast_node->child;
-                    continue;
+                    continue; 
                 }
 
                 const std::string& col = w->condition.left;

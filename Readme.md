@@ -8,6 +8,7 @@ I'm documenting everything as I build — code, bugs, decisions, and breakdowns.
 
 - 🎥 YouTube — [Stage 1: Lexer / Tokenizer](https://youtu.be/A9iKONyU0yU?si=O592VJJSCR695r2a)
 - 🎥 YouTube — [Stage 2: Parser](https://youtu.be/8oS6S5Kggxc)
+- 🎥 YouTube — [Stage 3: Semantic Analyzer](https://youtu.be/geoK6kt073M)
 - 📝 Medium — [Building a SQL Engine From Scratch](https://medium.com/@zoolpher)
 - 🐦 X — [@aryanmh0](https://x.com/aryanmh0)
 
@@ -113,7 +114,7 @@ make
 
 - [x] Stage 1 — Lexer / Tokenizer
 - [x] Stage 2 — Parser (AST Builder)
-- [ ] Stage 3 — Semantic Analyzer
+- [x] Stage 3 — Semantic Analyzer
 - [ ] Stage 4 — Query Planner
 - [ ] Stage 5 — Optimizer
 - [ ] Stage 6 — Execution Engine
