@@ -9,6 +9,8 @@ I'm documenting everything as I build — code, bugs, decisions, and breakdowns.
 - 🎥 YouTube — [Stage 1: Lexer / Tokenizer](https://youtu.be/A9iKONyU0yU?si=O592VJJSCR695r2a)
 - 🎥 YouTube — [Stage 2: Parser](https://youtu.be/8oS6S5Kggxc)
 - 🎥 YouTube — [Stage 3: Semantic Analyzer](https://youtu.be/geoK6kt073M)
+- 🎥 YouTube — [Stage 4: Query Planner](coming soon)
+  
 - 📝 Medium — [Building a SQL Engine From Scratch](https://medium.com/@zoolpher)
 - 🐦 X — [@aryanmh0](https://x.com/aryanmh0)
 
@@ -115,7 +117,7 @@ make
 - [x] Stage 1 — Lexer / Tokenizer
 - [x] Stage 2 — Parser (AST Builder)
 - [x] Stage 3 — Semantic Analyzer
-- [ ] Stage 4 — Query Planner
+- [x] Stage 4 — Query Planner
 - [ ] Stage 5 — Optimizer
 - [ ] Stage 6 — Execution Engine
 - [ ] Stage 7 — Storage Layer
@@ -244,5 +246,56 @@ if (WhereNode* w = dynamic_cast<WhereNode*>(ast_node)) {
 This is demonstrated live in `tests/test_semantic.cpp`.
 
 ---
+
+### Stage 4 — Query Planner ✅
+ 
+Implemented in `include/plan.h` and `src/planner/query_planner.cpp`.
+ 
+- Defined `PlanType` enum covering four operation types: `SCAN` (fetch rows), `FILTER` (apply WHERE), `SORT` (apply ORDER BY), `PROJECT` (select columns)
+- Defined `PlanNode` struct holding a `PlanType`, table name, sort column, `ConditionNode` for filter, and column list for projection
+- Query planner walks the AST via `child` pointer chain using `dynamic_cast` to identify node types — same traversal pattern as the semantic analyzer
+- Converts each AST node into a corresponding `PlanNode` and collects them into a flat `std::vector<PlanNode>`
+- Uses `std::reverse()` on the collected nodes to convert AST top-down order into correct bottom-up execution order: `SCAN → FILTER → SORT → PROJECT`
+## Bug Found in Stage 4 — Wrong Execution Order (SORT before SCAN)
+ 
+The parser was attaching `OrderByNode` to `fromNode->child` instead of between `WhereNode` and `FromNode`. This meant AST traversal encountered `OrderByNode` before `FromNode`, producing the wrong plan order even after `std::reverse()`.
+ 
+**What came out:**
+```
+Step 1: SORT   | column: name
+Step 2: SCAN   | table: users
+Step 3: FILTER | condition: age > 20
+Step 4: PROJECT| columns: name
+```
+ 
+**What should come out:**
+```
+Step 1: SCAN   | table: users
+Step 2: FILTER | condition: age > 20
+Step 3: SORT   | column: name
+Step 4: PROJECT| columns: name
+```
+ 
+**The fix:** Correct the AST node chain in the parser so `OrderByNode` sits between `WhereNode` and `FromNode`:
+ 
+```
+SelectNode → WhereNode → OrderByNode → FromNode
+```
+ 
+Not:
+ 
+```
+SelectNode → WhereNode → FromNode → OrderByNode
+```
+ 
+**The principle:**
+ 
+> The planner is only as correct as the AST it reads. Garbage in, garbage out — fix the structure before fixing the plan.
+ 
+This is demonstrated live in `tests/test_planner.cpp`.
+ 
+---
+
+
 
 Built by [zoolpher](https://github.com/zoolpher) — B.Tech CS, systems engineering track.
