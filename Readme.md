@@ -10,6 +10,7 @@ I'm documenting everything as I build — code, bugs, decisions, and breakdowns.
 - 🎥 YouTube — [Stage 2: Parser](https://youtu.be/8oS6S5Kggxc)
 - 🎥 YouTube — [Stage 3: Semantic Analyzer](https://youtu.be/geoK6kt073M)
 - 🎥 YouTube — [Stage 4: Query Planner](https://youtu.be/xt1vNpVrYrA)
+- 🎥 YouTube — [Stage 5: Optimizer](coming soon)
   
 - 📝 Medium — [Building a SQL Engine From Scratch](https://medium.com/@zoolpher)
 - 🐦 X — [@aryanmh0](https://x.com/aryanmh0)
@@ -118,7 +119,7 @@ make
 - [x] Stage 2 — Parser (AST Builder)
 - [x] Stage 3 — Semantic Analyzer
 - [x] Stage 4 — Query Planner
-- [ ] Stage 5 — Optimizer
+- [x] Stage 5 — Optimizer
 - [ ] Stage 6 — Execution Engine
 - [ ] Stage 7 — Storage Layer
 - [ ] Stage 8 — REPL Interface
@@ -295,6 +296,19 @@ SelectNode → WhereNode → FromNode → OrderByNode
 This is demonstrated live in `tests/test_planner.cpp`.
  
 ---
+
+### Stage 5 — Optimizer ✅
+
+Implemented in `src/optimizer/optimizer.cpp`.
+
+- Receives the logical plan (`vector<PlanNode>`) from the Query Planner
+- Implements **projection pruning** — finds the PROJECT node to extract the columns the user actually requested, then pushes those columns into the SCAN node so only required columns are loaded from storage
+- Prevents wasteful full-column scans — instead of loading all columns for every row (e.g. 7 columns × 1M rows), the executor only loads what's needed (e.g. 2 columns × 1M rows), saving memory and I/O
+- Returns the optimized plan ready for the Executor
+- `rule_projection_pruning.cpp` and `rule_predicate_pushdown.cpp` are structured placeholders — optimization rules will be modularized here in Phase 2
+
+---
+
 
 
 
