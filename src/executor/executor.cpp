@@ -1,10 +1,10 @@
 
 #include "../../include/plan.h"
-
 #include "../../include/table.h"
 #include "scan_node.cpp"
 #include "filter_node.cpp"
 #include "sort_node.cpp"
+
 #include <vector>
 #include <iostream>
 
@@ -31,8 +31,22 @@ public:
                 result = sort.execute(result);
             }
             else if (node.type == PlanType::PROJECT) {
-                // projection already handled in scan_node
-                // nothing to do here
+                // find indices of requested columns
+                Table projected;
+                for (const std::string& col : node.columns) {
+                    for (int i = 0; i < result.columns.size(); i++) {
+                        if (result.columns[i] == col) {
+                            projected.columns.push_back(col);
+                            for (auto& row : result.rows) {
+                                if (projected.rows.size() <= &row - &result.rows[0])
+                                    projected.rows.push_back({});
+                                projected.rows.back().push_back(row[i]);
+                            }
+                            break;
+                        }
+                    }
+                }
+                result = projected;
             }
         }
 
