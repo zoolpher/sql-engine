@@ -1,7 +1,7 @@
 
 #include "../../include/table.h"
-
 #include "../../include/plan.h"
+
 #include <vector>
 #include <string>
 #include <algorithm>
