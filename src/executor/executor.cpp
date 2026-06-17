@@ -31,21 +31,29 @@ public:
                 result = sort.execute(result);
             }
             else if (node.type == PlanType::PROJECT) {
-                // find indices of requested columns
                 Table projected;
+                
+                // find indices of requested columns
+                std::vector<int> indices;
                 for (const std::string& col : node.columns) {
-                    for (int i = 0; i < result.columns.size(); i++) {
+                    for (int i = 0; i < (int)result.columns.size(); i++) {
                         if (result.columns[i] == col) {
                             projected.columns.push_back(col);
-                            for (auto& row : result.rows) {
-                                if (projected.rows.size() <= &row - &result.rows[0])
-                                    projected.rows.push_back({});
-                                projected.rows.back().push_back(row[i]);
-                            }
+                            indices.push_back(i);
                             break;
                         }
                     }
                 }
+
+                // build rows row by row
+                for (auto& row : result.rows) {
+                    std::vector<std::string> newRow;
+                    for (int idx : indices) {
+                        newRow.push_back(row[idx]);
+                    }
+                    projected.rows.push_back(newRow);
+                }
+
                 result = projected;
             }
         }
